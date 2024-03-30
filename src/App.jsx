@@ -37,13 +37,9 @@ function App() {
     setUsers((prevUsers) => [...prevUsers, finalUser]);
   };
 
-  const handlefilteredUsers = users.filter((user) => {
-    const nameIncludesFilter =
-    user.name && user.name.toLowerCase().includes(searchValue.toLowerCase());
-    const numberIncludesFilter =
-    typeof user.number === "string" &&
-    user.number.toLowerCase().includes(searchValue.toLowerCase());
-    return nameIncludesFilter || numberIncludesFilter;
+ const handlefilteredUsers = users.filter(({name, number}) => {
+      const normalizeFilter = searchValue.toLowerCase()
+   return name.toLowerCase().includes(normalizeFilter)|| number.toLowerCase().includes(normalizeFilter);
   });
   
   return (
