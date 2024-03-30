@@ -1,33 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import userData from './users.json'
+import ContactForm from './components/ContactForm/ContactForm'
+import ContactList from './components/ContactList/ContactList'
+import SearchBox from './components/SearchBox/SearchBox'
+import { useEffect, useState } from 'react'
+import { nanoid } from 'nanoid'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [users, setUsers] = useState(() => {
+    const ourUsers = localStorage.getItem('users')
+    if (!ourUsers) return userData
 
+    const parsedUsers = JSON.parse(ourUsers)
+    return parsedUsers
+  })
+
+  const [searchValue, setSearchValue] = useState('')
+
+    useEffect(() => {
+    localStorage.setItem('users', JSON.stringify(users))
+    }, [users])
+
+  const handleChangeSearch = (e) => {
+    setSearchValue(() => e.target.value)
+  }
+
+  const handleDeleteUser = (userId) => {
+    setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+  }
+
+    const handleAddUser = (formData) => {
+    const finalUser = {
+      ...formData,
+      id: nanoid(),
+    };
+    setUsers((prevUsers) => [...prevUsers, finalUser]);
+  };
+
+  const handlefilteredUsers = users.filter((user) => {
+    const nameIncludesFilter =
+    user.name && user.name.toLowerCase().includes(searchValue.toLowerCase());
+    const numberIncludesFilter =
+    typeof user.number === "string" &&
+    user.number.toLowerCase().includes(searchValue.toLowerCase());
+    return nameIncludesFilter || numberIncludesFilter;
+  });
+  
   return (
     <>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1>Phonebook</h1>
+        <ContactForm handleAddUser={handleAddUser} />
+        <SearchBox handleChangeSearch={handleChangeSearch} value={searchValue} />
+        <ContactList handlefilteredUsers={handlefilteredUsers} handleDeleteUser={handleDeleteUser}/>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
